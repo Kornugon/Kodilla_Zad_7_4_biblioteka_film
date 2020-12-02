@@ -37,8 +37,11 @@ Wyświetli listę top 3 najpopularniejszych tytułów.
 import random
 from operator import attrgetter
 
+content_type_1 = "Movies"
+content_type_2 = "Series"
+
 class Films:
-    def __init__(self, title, rel_year, f_type, views):
+    def __init__(self, title: str, rel_year: int, f_type: str, views: int):
         self.title = title
         self.rel_year = rel_year
         self.f_type = f_type
@@ -53,7 +56,7 @@ class Films:
 
 
 class Series(Films):
-    def __init__(self, s_number, e_number, *args, **kwargs):
+    def __init__(self, s_number: int, e_number: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.s_number = s_number
         self. e_number =  e_number
@@ -75,80 +78,93 @@ show_list = [
     Films(title="Predator", rel_year="2018", f_type="Sci-Fi", views=55)
     ]
 
-def get_series(list_of_shows):
-    """
-    Get series from "show_list" list and sort them by title parameter of it is class.
-    """
-    series = []
-    for i in list_of_shows:
-        if isinstance(i, Series):
-            series.append(i)
-    series = sorted(series, key=attrgetter("title"))
-    return series
 
-def get_movies(list_of_shows):
-    """
-    Get movies from "show_list" list and sort them by title parameter of it is class.
-    """
-    movies = []
-    for i in list_of_shows:
-        if not isinstance(i, Series):
-            movies.append(i)
-    movies = sorted(movies, key=attrgetter("title"))
-    return movies
+class Library:
+    def __init__(self, list_of_shows: list):
+        self.list_of_shows = list_of_shows
 
+    def get_series(self):
+        """
+        Get series from "list_of_shows" and sort them by title parameter of it is class.
+        """
+        series = []
+        for i in self.list_of_shows:
+            if isinstance(i, Series):
+                series.append(i)
+        series = sorted(series, key=attrgetter("title"))
+        return series
 
-def search(list_of_shows):
-    user_show = input("Find move or series by title: ").capitalize()
-    for i in list_of_shows:
-        if user_show == i.__getattribute__("title"):
-            print(f"Your show is: {i}")
+    def get_movies(self):
+        """
+        Get movies from "list_of_shows" and sort them by title parameter of it is class.
+        """
+        movies = []
+        for i in self.list_of_shows:
+            if not isinstance(i, Series):
+                movies.append(i)
+        movies = sorted(movies, key=attrgetter("title"))
+        return movies
 
 
-def generate_views(list_of_shows):
-    show = random.choice(list_of_shows)
-    setattr(show, "views", getattr(show, "views") + random.randint(1,100))
+    def search(self):
+        user_show = input("Find movie or series by title: ").capitalize()
+        for i in self.list_of_shows:
+            if user_show == i.title:
+                print(f"Your show is: {i}")
 
 
-def generate_views_10_times(list_of_shows):
-    for _ in range(10):
-        generate_views(list_of_shows)
+    def generate_views(self):
+        show = random.choice(self.list_of_shows)
+        setattr(show, "views", getattr(show, "views") + random.randint(1,100))
 
 
-def top_titles(list_of_shows, content_type):
-    """
-    Get top titles by Series or by Movies. 
-    reverse parameter = True - sorted from most views
-    """
-    if content_type == "Movies":
-        list_of_contents = sorted(get_movies(list_of_shows), key=attrgetter("views"), reverse=True)
-    elif content_type == "Series":
-        list_of_contents = sorted(get_series(list_of_shows), key=attrgetter("views"), reverse=True)
-    return list_of_contents
+    def generate_views_10_times(self):
+        for _ in range(10):
+            self.generate_views()
 
 
-
-
-
-#series = get_series(show_list)
-#for i in series:
-#    print(i)
-
-#movies = get_movies(show_list)
-#for i in movies:
-#    print(i)
+    def top_titles(self, content_type):
+        """
+        Get top titles by Series or by Movies. 
+        reverse parameter = True - sorted from most views
+        """
+        self.content_type = content_type
+        if self.content_type == content_type_1:
+            list_of_contents = sorted(self.get_movies(), key=attrgetter("views"), reverse=True)
+        elif self.content_type == content_type_2:
+            list_of_contents = sorted(self.get_series(), key=attrgetter("views"), reverse=True)
+        return list_of_contents
 
 
 
+if __name__ == '__main__':
 
-#search(show_list)
+    lib_1 = Library(show_list)
 
 
+    #printowanie tylko seriali
+    series = lib_1.get_series()
+    for i in series:
+        print(i)
+    print("\n")
 
 
-generate_views_10_times(show_list)
+    #printowanie tylko filmów
+    movies = lib_1.get_movies()
+    for i in movies:
+        print(i)
+    print("\n")
 
-for i in top_titles(show_list, "Movies"):
-    print(i)
-for i in top_titles(show_list, "Series"):
-    print(i)
+
+    #generowanie
+    lib_1.generate_views()
+    lib_1.generate_views_10_times()
+
+    for i in lib_1.top_titles(content_type=content_type_1):
+        print(i)
+    for i in lib_1.top_titles(content_type=content_type_2):
+        print(i)
+    
+    #szukanie po tytule
+    print("\n")
+    lib_1.search()
